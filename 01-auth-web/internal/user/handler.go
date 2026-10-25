@@ -11,7 +11,7 @@ type userHandler struct {
 	validate *validator.Validate
 }
 
-func NewUserHandler(service *UserService, validate *validator.Validate) *userHandler {
+func NewUserHandler(service *UserService) *userHandler {
 	return &userHandler{
 		service:  service,
 		validate: validator.New(),

@@ -12,7 +12,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	newUserRepo := user.NewUserRepository(db)
-	newUserService := user.NewUserService(newUserRepo)
+	userRepo := user.NewUserRepository(db)
+	userService := user.NewUserService(userRepo)
+	userHandler := user.NewUserHandler(userService)
 
 }
