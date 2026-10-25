@@ -24,6 +24,7 @@ type RegisterUser struct {
 
 type UpdateUserProfile struct {
 	Username    string `json:"username" validate:"required,min=2,max=100"`
+	Email       string `json:"email" validate:"required,email"`
 	DateOfBirth time.Time
 }
 
