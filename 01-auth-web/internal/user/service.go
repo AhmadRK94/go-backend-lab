@@ -3,7 +3,7 @@ package user
 import (
 	"context"
 
-	"github.com/AhmadRK94/go-backend-lab/auth-web/internal/auth"
+	"github.com/AhmadRK94/go-backend-lab/auth-web/internal/password"
 )
 
 type UserService struct {
@@ -15,7 +15,7 @@ func NewUserService(repo UserRepository) *UserService {
 }
 
 func (s *UserService) Register(ctx context.Context, user RegisterUser) (ResponseUser, error) {
-	hashedPass, err := auth.HashPassword(user.Password)
+	hashedPass, err := password.HashPassword(user.Password)
 	if err != nil {
 		return ResponseUser{}, err
 	}
@@ -105,10 +105,10 @@ func (s *UserService) ChangePassword(ctx context.Context, id uint, currentPasswo
 	if err != nil {
 		return err
 	}
-	if err := auth.ComparePassword(currentPassword, user.HashedPassword); err != nil {
+	if err := password.ComparePassword(currentPassword, user.HashedPassword); err != nil {
 		return ErrInvalidCurrentPassword
 	}
-	newHash, err := auth.HashPassword(newPassword)
+	newHash, err := password.HashPassword(newPassword)
 	if err != nil {
 		return err
 	}
