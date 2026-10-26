@@ -13,7 +13,7 @@ type UserRepository interface {
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetAllUsers(ctx context.Context) ([]User, error)
 	Delete(ctx context.Context, id uint) error
-	Update(ctx context.Context, id uint, user *UpdateUserProfile) error
+	Update(ctx context.Context, id uint, user *UpdateUserProfile) (User, error)
 	ChangePassword(ctx context.Context, id uint, hash string) error
 }
 
@@ -90,14 +90,14 @@ func (r *GormUserRepository) Delete(ctx context.Context, id uint) error {
 	return nil
 }
 
-func (r *GormUserRepository) Update(ctx context.Context, id uint, updateInfo *UpdateUserProfile) error {
+func (r *GormUserRepository) Update(ctx context.Context, id uint, updateInfo *UpdateUserProfile) (User, error) {
 	var user User
 	err := r.db.WithContext(ctx).First(&user, id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return ErrUserNotFound
+			return User{}, ErrUserNotFound
 		}
-		return err
+		return User{}, err
 	}
 	user.Username = updateInfo.Username
 	user.DateOfBirth = updateInfo.DateOfBirth
@@ -105,22 +105,26 @@ func (r *GormUserRepository) Update(ctx context.Context, id uint, updateInfo *Up
 	err = r.db.WithContext(ctx).Save(&user).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrDuplicatedKey) {
-			return ErrDuplicateEmail
+			return User{}, ErrDuplicateEmail
 		}
-		return err
+		return User{}, err
 	}
-	return nil
+	return user, nil
 }
 
 func (r *GormUserRepository) ChangePassword(ctx context.Context, id uint, hash string) error {
-	var user User
-	err := r.db.WithContext(ctx).First(&user, id).Error
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return ErrUserNotFound
-		}
-		return err
+	result := r.db.WithContext(ctx).
+		Model(&User{}).
+		Where("id = ?", id).
+		Update("hashed_password", hash)
+
+	if result.Error != nil {
+		return result.Error
 	}
-	user.HashedPassword = hash
-	return r.db.WithContext(ctx).Save(&user).Error
+
+	if result.RowsAffected == 0 {
+		return ErrUserNotFound
+	}
+
+	return nil
 }
