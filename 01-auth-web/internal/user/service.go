@@ -66,7 +66,7 @@ func (s *UserService) GetByEmail(ctx context.Context, email string) (ResponseUse
 }
 
 // to do: add pagination
-func (s *UserService) GetAll(ctx context.Context) ([]ResponseUser, error) {
+func (s *UserService) GetAllUsers(ctx context.Context) ([]ResponseUser, error) {
 	users, err := s.repo.GetAllUsers(ctx)
 	if err != nil {
 		return nil, err

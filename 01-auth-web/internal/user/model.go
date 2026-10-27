@@ -27,6 +27,10 @@ type UpdateUserProfile struct {
 	Email       string `json:"email" validate:"required,email"`
 	DateOfBirth time.Time
 }
+type UpdatePassword struct {
+	CurrentPassword string `json:"current_password" validate:"required,min=8"`
+	NewPassword     string `json:"new_password" validate:"required,min=8"`
+}
 
 type ResponseUser struct {
 	ID          uint      `json:"id"`
@@ -34,8 +38,3 @@ type ResponseUser struct {
 	Email       string    `json:"email"`
 	DateOfBirth time.Time `json:"date_of_birth"`
 }
-
-// type LoginUser struct {
-// 	Email    string `json:"email" validate:"required,email"`
-// 	Password string `json:"password" validate:"required,min=8"`
-// }
