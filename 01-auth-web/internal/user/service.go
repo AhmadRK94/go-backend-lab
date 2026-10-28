@@ -6,15 +6,15 @@ import (
 	"github.com/AhmadRK94/go-backend-lab/auth-web/internal/password"
 )
 
-type UserService struct {
+type Service struct {
 	repo UserRepository
 }
 
-func NewUserService(repo UserRepository) *UserService {
-	return &UserService{repo: repo}
+func NewService(repo UserRepository) *Service {
+	return &Service{repo: repo}
 }
 
-func (s *UserService) Register(ctx context.Context, user RegisterUser) (ResponseUser, error) {
+func (s *Service) Register(ctx context.Context, user RegisterUser) (ResponseUser, error) {
 	hashedPass, err := password.HashPassword(user.Password)
 	if err != nil {
 		return ResponseUser{}, err
@@ -37,7 +37,7 @@ func (s *UserService) Register(ctx context.Context, user RegisterUser) (Response
 	}, nil
 }
 
-func (s *UserService) GetByID(ctx context.Context, id uint) (ResponseUser, error) {
+func (s *Service) GetByID(ctx context.Context, id uint) (ResponseUser, error) {
 	user, err := s.repo.GetUserByID(ctx, id)
 	if err != nil {
 		return ResponseUser{}, err
@@ -51,7 +51,7 @@ func (s *UserService) GetByID(ctx context.Context, id uint) (ResponseUser, error
 	}, nil
 }
 
-func (s *UserService) GetByEmail(ctx context.Context, email string) (ResponseUser, error) {
+func (s *Service) GetByEmail(ctx context.Context, email string) (ResponseUser, error) {
 	user, err := s.repo.GetUserByEmail(ctx, email)
 	if err != nil {
 		return ResponseUser{}, err
@@ -66,7 +66,7 @@ func (s *UserService) GetByEmail(ctx context.Context, email string) (ResponseUse
 }
 
 // to do: add pagination
-func (s *UserService) GetAllUsers(ctx context.Context) ([]ResponseUser, error) {
+func (s *Service) GetAllUsers(ctx context.Context) ([]ResponseUser, error) {
 	users, err := s.repo.GetAllUsers(ctx)
 	if err != nil {
 		return nil, err
@@ -83,11 +83,11 @@ func (s *UserService) GetAllUsers(ctx context.Context) ([]ResponseUser, error) {
 	return resp, nil
 }
 
-func (s *UserService) DeleteAccount(ctx context.Context, id uint) error {
+func (s *Service) DeleteAccount(ctx context.Context, id uint) error {
 	return s.repo.Delete(ctx, id)
 }
 
-func (s *UserService) UpdateProfile(ctx context.Context, id uint, newInfo UpdateUserProfile) (ResponseUser, error) {
+func (s *Service) UpdateProfile(ctx context.Context, id uint, newInfo UpdateUserProfile) (ResponseUser, error) {
 	user, err := s.repo.Update(ctx, id, &newInfo)
 	if err != nil {
 		return ResponseUser{}, err
@@ -100,7 +100,7 @@ func (s *UserService) UpdateProfile(ctx context.Context, id uint, newInfo Update
 	}, nil
 }
 
-func (s *UserService) ChangePassword(ctx context.Context, id uint, currentPassword string, newPassword string) error {
+func (s *Service) ChangePassword(ctx context.Context, id uint, currentPassword string, newPassword string) error {
 	user, err := s.repo.GetUserByID(ctx, id)
 	if err != nil {
 		return err

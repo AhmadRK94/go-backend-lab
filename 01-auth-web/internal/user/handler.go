@@ -9,15 +9,15 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type userHandler struct {
-	service  *UserService
+type Handler struct {
+	service  *Service
 	validate *validator.Validate
 }
 
-func NewUserHandler(service *UserService) *userHandler {
-	return &userHandler{
+func NewHandler(service *Service, validator *validator.Validate) *Handler {
+	return &Handler{
 		service:  service,
-		validate: validator.New(),
+		validate: validator,
 	}
 }
 
@@ -27,7 +27,7 @@ func JSONResponse(w http.ResponseWriter, statusCode int, msg any) {
 	_ = json.NewEncoder(w).Encode(msg)
 }
 
-func (h *userHandler) Register(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	var req RegisterUser
@@ -66,7 +66,7 @@ func (h *userHandler) Register(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (h *userHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	strID := r.PathValue("id")
 
 	id, err := strconv.ParseUint(strID, 10, 32)
@@ -94,7 +94,7 @@ func (h *userHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h *userHandler) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 	if email == "" {
 		JSONResponse(w, http.StatusBadRequest, map[string]string{
@@ -121,7 +121,7 @@ func (h *userHandler) GetUserByEmail(w http.ResponseWriter, r *http.Request) {
 }
 
 // to do: add pagination
-func (h *userHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := h.service.GetAllUsers(r.Context())
 	if err != nil {
 		JSONResponse(w, http.StatusInternalServerError, map[string]string{
@@ -132,7 +132,7 @@ func (h *userHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	JSONResponse(w, http.StatusOK, users)
 }
 
-func (h *userHandler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	strID := r.PathValue("id")
 
 	id, err := strconv.ParseUint(strID, 10, 32)
@@ -157,7 +157,7 @@ func (h *userHandler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 
 }
-func (h *userHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	strID := r.PathValue("id")
 
 	id, err := strconv.ParseUint(strID, 10, 32)
@@ -204,7 +204,7 @@ func (h *userHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	JSONResponse(w, http.StatusOK, user)
 
 }
-func (h *userHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	strID := r.PathValue("id")
 
 	id, err := strconv.ParseUint(strID, 10, 32)

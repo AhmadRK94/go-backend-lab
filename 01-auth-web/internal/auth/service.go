@@ -3,6 +3,7 @@ package auth
 import (
 	"context"
 	"errors"
+	"strconv"
 
 	"github.com/AhmadRK94/go-backend-lab/auth-web/internal/password"
 	"github.com/AhmadRK94/go-backend-lab/auth-web/internal/user"
@@ -13,19 +14,19 @@ type TokenPair struct {
 	RefreshToken string
 }
 
-type AuthService struct {
+type Service struct {
 	usersRepo user.UserRepository
 	jwt       *JWTManager
 }
 
-func NewAuthService(userRepo user.UserRepository, jwtManager *JWTManager) *AuthService {
-	return &AuthService{
+func NewService(userRepo user.UserRepository, jwtManager *JWTManager) *Service {
+	return &Service{
 		usersRepo: userRepo,
 		jwt:       jwtManager,
 	}
 }
 
-func (s *AuthService) Login(ctx context.Context, loginInfo LoginInfo) (TokenPair, error) {
+func (s *Service) Login(ctx context.Context, loginInfo LoginInfo) (TokenPair, error) {
 	u, err := s.usersRepo.GetUserByEmail(ctx, loginInfo.Email)
 	if err != nil {
 		if errors.Is(err, user.ErrUserNotFound) {
@@ -49,4 +50,22 @@ func (s *AuthService) Login(ctx context.Context, loginInfo LoginInfo) (TokenPair
 		AccessToken:  access,
 		RefreshToken: refresh,
 	}, nil
+}
+
+func (s *Service) Refresh(refreshToken string) (string, error) {
+	claims, err := s.jwt.ValidateToken(refreshToken, "refresh")
+	if err != nil {
+		return "", err
+	}
+	id, err := strconv.ParseUint(claims.Subject, 10, 64)
+	if err != nil || id == 0 {
+		return "", ErrInvalidToken
+	}
+
+	return s.jwt.GenerateAccessToken(uint(id))
+}
+
+func (s *Service) Logout(refreshToken string) error {
+	_, err := s.jwt.ValidateToken(refreshToken, "refresh")
+	return err
 }
