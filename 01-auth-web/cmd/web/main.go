@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/AhmadRK94/go-backend-lab/auth-web/internal/auth"
@@ -29,7 +28,5 @@ func main() {
 	)
 	authService := auth.NewService(userRepo, jwtManager)
 	authHandler := auth.NewHandler(authService, validate)
-
-	http.HandleFunc("POST /register", userHandler.Register)
 
 }

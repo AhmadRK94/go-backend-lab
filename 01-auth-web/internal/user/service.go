@@ -14,29 +14,6 @@ func NewService(repo UserRepository) *Service {
 	return &Service{repo: repo}
 }
 
-func (s *Service) Register(ctx context.Context, user RegisterUser) (ResponseUser, error) {
-	hashedPass, err := password.HashPassword(user.Password)
-	if err != nil {
-		return ResponseUser{}, err
-	}
-	u := &User{
-		Username:       user.Username,
-		HashedPassword: hashedPass,
-		Email:          user.Email,
-		DateOfBirth:    user.DateOfBirth,
-	}
-	err = s.repo.Create(ctx, u)
-	if err != nil {
-		return ResponseUser{}, err
-	}
-	return ResponseUser{
-		ID:          u.ID,
-		Username:    u.Username,
-		Email:       u.Email,
-		DateOfBirth: u.DateOfBirth,
-	}, nil
-}
-
 func (s *Service) GetByID(ctx context.Context, id uint) (ResponseUser, error) {
 	user, err := s.repo.GetUserByID(ctx, id)
 	if err != nil {

@@ -27,45 +27,6 @@ func JSONResponse(w http.ResponseWriter, statusCode int, msg any) {
 	_ = json.NewEncoder(w).Encode(msg)
 }
 
-func (h *Handler) Register(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	var req RegisterUser
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		JSONResponse(w, http.StatusBadRequest, map[string]string{
-			"error": "invalid request body",
-		})
-		return
-	}
-
-	if err := h.validate.Struct(req); err != nil {
-		JSONResponse(w, http.StatusBadRequest, map[string]string{
-			"error": "validation failed",
-		})
-		return
-	}
-
-	user, err := h.service.Register(ctx, req)
-	if err != nil {
-		if errors.Is(err, ErrDuplicateEmail) {
-			JSONResponse(w, http.StatusConflict, map[string]string{
-				"error": "user with this email already exists",
-			})
-			return
-		}
-
-		JSONResponse(w, http.StatusInternalServerError, map[string]string{
-			"error": "could not register user",
-		})
-		return
-	}
-
-	JSONResponse(w, http.StatusCreated, map[string]any{
-		"message": "user registered successfully",
-		"data":    user,
-	})
-}
-
 func (h *Handler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	strID := r.PathValue("id")
 

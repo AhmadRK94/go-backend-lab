@@ -26,6 +26,29 @@ func NewService(userRepo user.UserRepository, jwtManager *JWTManager) *Service {
 	}
 }
 
+func (s *Service) Register(ctx context.Context, userInfo user.RegisterUser) (user.ResponseUser, error) {
+	hashedPass, err := password.HashPassword(userInfo.Password)
+	if err != nil {
+		return user.ResponseUser{}, err
+	}
+	u := &user.User{
+		Username:       userInfo.Username,
+		HashedPassword: hashedPass,
+		Email:          userInfo.Email,
+		DateOfBirth:    userInfo.DateOfBirth,
+	}
+	err = s.usersRepo.Create(ctx, u)
+	if err != nil {
+		return user.ResponseUser{}, err
+	}
+	return user.ResponseUser{
+		ID:          u.ID,
+		Username:    u.Username,
+		Email:       u.Email,
+		DateOfBirth: u.DateOfBirth,
+	}, nil
+}
+
 func (s *Service) Login(ctx context.Context, loginInfo LoginInfo) (TokenPair, error) {
 	u, err := s.usersRepo.GetUserByEmail(ctx, loginInfo.Email)
 	if err != nil {
